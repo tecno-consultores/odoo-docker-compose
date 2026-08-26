@@ -20,7 +20,6 @@ x-odoo-base: &odoo-base
       - ./etc:/etc/odoo
     networks:
       - odoo-net
-    command: ["odoo", "--admin-passwd", "${ODOO_ADMIN_PASSWORD}"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8069/web/health"]
       interval: 30s
