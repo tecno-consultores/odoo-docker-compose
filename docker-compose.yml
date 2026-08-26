@@ -12,6 +12,7 @@ x-odoo-base: &odoo-base
       - HOST=db
       - USER=${USER}
       - PASSWORD=${PASSWORD}
+      - ODOO_ADMIN_PASSWORD=${ODOO_ADMIN_PASSWORD}
       - PIP_BREAK_SYSTEM_PACKAGES=1
     volumes:
       - odoo-web-data:/var/lib/odoo
@@ -19,6 +20,7 @@ x-odoo-base: &odoo-base
       - ./etc:/etc/odoo
     networks:
       - odoo-net
+    command: ["odoo", "--admin-passwd", "${ODOO_ADMIN_PASSWORD}"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8069/web/health"]
       interval: 30s
