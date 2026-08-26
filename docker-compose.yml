@@ -1,0 +1,102 @@
+# Made by: Tecno Consultores 2023
+x-odoo-base: &odoo-base
+    image: odoo:19
+    hostname: odoo
+    container_name: odoo
+    pull_policy: ${pull_policy}
+    restart: ${restart}
+    ports:
+      - "8069:8069"
+    tty: true
+    environment:
+      - HOST=db
+      - USER=${USER}
+      - PASSWORD=${PASSWORD}
+      - PIP_BREAK_SYSTEM_PACKAGES=1
+    volumes:
+      - odoo-web-data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons
+      - ./etc:/etc/odoo
+    networks:
+      - odoo-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8069/web/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+x-db-base: &db-base
+    image: postgres:18
+    hostname: db
+    container_name: db
+    pull_policy: ${pull_policy}
+    restart: ${restart}
+    environment:
+      - POSTGRES_USER=${USER}
+      - POSTGRES_PASSWORD=${PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - TZ=${TIMEZONE}
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data/pgdata
+    networks:
+      - odoo-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+x-proxy-base: &proxy-base
+    image: jc21/nginx-proxy-manager:latest
+    hostname: proxy
+    container_name: proxy
+    restart: always
+    pull_policy: always
+    dns:
+      - 192.168.1.1 # Asigne la IP correcta de su enrutador de red
+    environment:
+      - DISABLE_IPV6=true
+      - INITIAL_ADMIN_EMAIL=${INITIAL_ADMIN_EMAIL}
+      - INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD}
+      - TZ=${TIMEZONE}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "81:81"
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    networks:
+      - odoo-net
+    healthcheck:
+      test: ["CMD", "/usr/bin/check-health"]
+      interval: 10s
+      timeout: 3s
+
+################################################
+
+volumes:
+  odoo-web-data:
+  odoo-db-data:
+
+networks:
+  odoo-net:
+    driver: bridge
+
+################################################
+
+services:
+  odoo:
+    <<: *odoo-base
+    profiles: ["odoo"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    <<: *db-base
+    profiles: ["odoo"]
+
+  proxy:
+    <<: *proxy-base
+    profiles: ["proxy"]
