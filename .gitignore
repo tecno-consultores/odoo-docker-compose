@@ -12,3 +12,5 @@ __pycache__/
 /letsencrypt/
 /addons/*
 !/addons/.gitkeep
+etc/odoo.conf
+!etc/odoo.conf.example
