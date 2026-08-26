@@ -18,6 +18,12 @@ x-odoo-base: &odoo-base
       - odoo-web-data:/var/lib/odoo
       - ./addons:/mnt/extra-addons
       - ./etc:/etc/odoo
+    command: >
+      /bin/bash -c "
+      echo '[options]' > /tmp/secret.conf && 
+      echo 'admin_passwd = ${ODOO_ADMIN_PASSWORD}' >> /tmp/secret.conf && 
+      odoo -c /etc/odoo/odoo.conf -c /tmp/secret.conf
+      "
     networks:
       - odoo-net
     healthcheck:
