@@ -12,18 +12,11 @@ x-odoo-base: &odoo-base
       - HOST=db
       - USER=${USER}
       - PASSWORD=${PASSWORD}
-      - ODOO_ADMIN_PASSWORD=${ODOO_ADMIN_PASSWORD}
       - PIP_BREAK_SYSTEM_PACKAGES=1
     volumes:
       - odoo-web-data:/var/lib/odoo
       - ./addons:/mnt/extra-addons
       - ./etc:/etc/odoo
-    command: >
-      /bin/bash -c "
-      echo '[options]' > /tmp/secret.conf && 
-      echo 'admin_passwd = ${ODOO_ADMIN_PASSWORD}' >> /tmp/secret.conf && 
-      odoo -c /etc/odoo/odoo.conf -c /tmp/secret.conf
-      "
     networks:
       - odoo-net
     healthcheck:
