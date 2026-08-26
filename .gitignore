@@ -1,0 +1,14 @@
+*~
+.DS_Store
+Thumbs.db
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.uv/
+*.env
+/etc/odoo.conf
+/data/
+/letsencrypt/
+/addons/*
+!/addons/.gitkeep
